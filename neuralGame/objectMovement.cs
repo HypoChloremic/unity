@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -15,4 +15,12 @@ public class objectMovement : MonoBehaviour {
 	void Update () {
 		
 	}
+
+    // remember that OnTriggerEnter2D is inherited from
+    // Monobehavior, and what we are doing now is overriding
+    // the method, with some tweaks. 
+    void OnTriggerEnter2D()
+    {
+        Debug.Log("Hello world");
+    }
 }
