@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 
 // note that the colon in c# refers to inheritance
+// as opposed to c++, it seems that we can use
+// public here, feels very much like java. 
 public class GameControl : MonoBehaviour {
     // Regarding transform, it seems that all objects in unity
     // have a transform. 

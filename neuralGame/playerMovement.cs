@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 // I assume that this is class (module?) is necessary
 // is necessary for running it on
 //using UnityStandardAssets.CrossPlatformInput;
@@ -60,4 +61,10 @@ public class playerMovement : MonoBehaviour {
 
         }
 	}
+
+    void OnTriggerEnter2D()
+    {
+        //Application.LoadLevel("scene01");
+        SceneManager.LoadScene("scene01");
+    }
 }
