@@ -1,4 +1,4 @@
-// note that when it is stored in the Hidden cateogory
+﻿// note that when it is stored in the Hidden cateogory
 // we will not be able to associate it with our 
 // materials in unity
 //Shader "Hidden/NewImageEffectShader"
@@ -52,10 +52,17 @@ Shader "Explorer/mandelbrot"
 
 			fixed4 frag (v2f i) : SV_Target
 			{
-				fixed4 col = tex2D(_MainTex, i.uv);
-				// just invert the colors
-				col.rgb = 1 - col.rgb;
-				return col;
+				float2 c = i.uv;
+				float2 z;
+				float iter;
+				for (iter = 0; iter < 255; iter++) {
+					z = float2(z.x*z.x - z.y*z.y, 2 * z.x*z.y) + c;
+					if (length(z) > 2) {
+						break;
+					}
+					
+				}
+				return iter / 255;
 			}
 			ENDCG
 		}
