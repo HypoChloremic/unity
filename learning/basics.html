@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>#### 2D Projects ####</title>
+</head>
+<body>
+
+
+<h1>Based upon what I have recently encountered.</h1>
+
+<h4>Sprites</h4>
+<p> 
+Working with sprites. Firstly we notice that when working with a sprite project
+there are several aspects to remember and need be considered. Firstly, in unity, we work
+in scenes. There are ofcourse assets that are representes the object data needed to 
+create the scenes, stored in the disk. Scenes are then constructed by the congregation
+of these hard-stored assets. </p>
+
+<p> 1. we commence by first creating a "new scene"</p>
+
+<p> 2. we then create an empty gameobject, that we rename player. This player-object in turn 
+will be constructed by giving it multiple functions, assets and so on. </p>
+
+<p>3. It is started by selecting from the sprites, which one will represent the idle animation, select them and then
+drag them to the playerobject. Subsequently, renaming the animation to for instance "PlayerIdle", 
+and so on. This will create a SpriteRenderer and an Animator in the player-object</p>
+
+<p>4. The saved animation, PlayerIdle also generated in the animations folder an animations-controller, that will allow us
+to control the animation. </p>
+
+<p>5. we can create a separate folder in the Assets\Animations folder named Assets\Animations\AnimationControllers. </p>
+
+<p>6. If we now create a new animation by moving more sprites to the player-object, we will generate another animation, 
+but not an animation-controller. </p>
+
+<p>7. The animation-controller is the </p>
+
+<img src="AnimationController.png"></img>
+
+<p>8. Alright, what we are supposed to note here is the existence of layers and tags that we are able to use. by looking at 
+the top of the inspector we will note that there is a tag and a layer parameter field. We can add new tags and layers by clicking
+on the fields and selecting "Add Tag" or "Add Layer"</p>
+
+<p>9. There are also sorting layers for the sprite renederer</p>
+
+<img src="TagsAndLayers.png"></img>
+
+
+<h4>Box Colliders and Rigidbodies</h4>
+
+<p>10. Next is to add the box-colliders and the rigidbodies. The box-colliders will interact on a collision basis with other colliders and 
+rigidbodies. The Rigidbody will enable the interactions with physics system.
+
+<p>Dynamic bodies have a Rigidbody component attached to them and their isKinematic flag set to false. These objects move at the whims of physics according to their velocities/angular velocities and the forces/torques and collision impacts exerted on them. The physics engine takes responsibility for resolving their collisions with static, kinematic, and other dynamic objects and rebounding them as needed.</p>
+
+<p>Use these for basic physics objects you want to be able to stack & topple and have them behave plausibly with minimal intervention, or for objects that you want to steer in a physics-focused way, like a rocketship.</p>
+
+<p>Kinematic bodies have a Rigidbody component with the isKinematic flag set to true. This tells the physics engine "this object moves, but I'll handle that part" — the kinematic object will process collisions with other rigidbodies, but only dynamic objects will automatically react by bouncing away. The kinematic object itself won't move except how you tell it to with MovePosition()/MoveRotation() — its velocity won't automatically integrate each timestep.</p>
+
+
+<p>11. Having created rigidbodies setting to kinematic body type instead of dynamic, and a box collider, we drag the player-object to the Assets\Prefabs folder. </p>
+
+
+<p>12. When we create the enemy objects similarly, if we have more than one enemies, that will share the same core-functon, such as idling and attacking, we can use the 
+same Animatori-Controller. The problem here is that we will have different between the two enemies. In order to play the different sprites, whilst at the same time
+using the same scripts to control them, we will use an Animation-Override controller. </p>
+
+<img src="AnimationOverrideController.png"></img>
+
+<p>13. The first thing that needs to be specified when creating an animation override controller is what animation will be overidden. We name the animation-override controller to Enemy2, and drag the Enemy1
+animation-controller to the controller parameter in the Animation-Override controller called "Enemy2".</p>
+
+<p>14. Subsequently we will drag Enemy2Idle and Enemy2Attack to the Enemy1Idle and Enemy1Attack parameters</p>
+
+<p>15. Do not forget to change the animator controlle to "Enemy2" now</p>
+
+<h4>Floors, tiles, food, and other items</h4>
+
+<p>16. For the floor, we will create 10 floor-objects. Strat by creating an empty game-object in the scene. add sprite-renderer component. then in the sprite-renderer
+select first floor sprite, not several. Save and copy the floor1-object to the prefabs, and iterate for floor2 and so on. </p>
+
+<p>17. for the Exit tile, reuse the floor-object, rename it to Exit, select the Exit sprite and add a box-collider 2D component and activate Is-trigger, such that the 
+player can move into it, but the object will call a trigger function when the player collides with it. </p>
+
+<p>18. Make sure also that the Exit-object is layered as item, such that it will render behind the player, i.e. unit, but in front of the floor. </p>
+
+<p>19. For the Food- and Soda-object we can reuse the Exit-object, sorting layer as items, and tag as food and soda respectively. the layer will remain as Default
+because these objects will not prevent anything from moving into them, only trigger an event when the player moves into them. </p>
+
+<p>20. creating the OuterWall and InnerWall object, note to let them have box-collider 2D, but turning off is trigger, because these will be preventing the player
+from entering them.</p>
+
+<h4>Game Manager and Board Manager Scripts</h4>
+
+<p>21. Now we will be creating the generation of the maps. </p>
+
+<p>22. the boardManager is a script containing a bunch of private and one public methods which are constructed to produce game board, look at the script for more details, I have
+commented the stuff I found interesting and needed further explanation. </p>
+
+<p>23. the GameManager will be using the boardManager to set things up. Note that the GameManager needs to be a singleton, i.e. that only one of them is allowed in the game. For 
+this to be done we need to declar: "public static GameManager = null;"</p>
+
+
+<p>24. Once done with the GameManager and the BoardManager scripts, drag the GameManager object to the prefabs</p>
+
+<p>25. create a "Loader.cs" script where we will check to make sure that the gamemanager is null, and then instantiate gamemanager upon making sure that. add the loader.cs script to the camera. </p>
+
+<h4>Movement</h4>
+
+<p>26. Create a csharp script called MovingObject. Checkout the code in the MovingObjects script for further details</p>
+
+
+<h4>Player Animator Controller</h4>
+
+<p>27. For player anmimation control, re-add the player prefab to the hierarchy. </p>
+
+<p>28. What is noticed, is that there is an entry state connected to another state, most likely playerIdle. This represents the default state. We are now going to set up the transitions
+between the different states for the player. </p>
+
+<p>29. We will thus start by creting a number of parameters</p>
+
+<p>30. for playerHit, add a parameter of the type Trigger. A trigger is a boolean that is true for the frame it is true until it becomes false again. </p>
+
+<p>31. create now transitions between playerIdle and playerMine both ways such that we can transition between both states from both directions. </p>
+
+<p>32. select playerIdle -> playerMine, uncheck hasExitTime, becuase hasExitTime implies that we will wait for the animation to finish, the playerIdle one, before
+transitioning to playerMine.</p>
+
+<p>33. have the transitionduration 0, because we are working with sprites. </p>
+
+<p>34. for the conditions select playerMine from the list, which is the parameter trigger we created. </p>
+
+<p>35. for playerMine -> playerIdle we will have an exitTime of 1 and not 0 such that we let the animation play completely before transitioning back to playerIdle. the
+transitionDuration will be 0 here as well, becuase we are working with sprites. We do not need conditions here because we have an exitTime which will return us to playerIdle
+once finished. </p>
+
+<p>36. You can try out the animations by hitting play and manually activating the different parameter triggers. </p>
+
+<h4>Player Script</h4>
+
+<p>37. We gotta add some stuff to the GameManager that we will make use of. </p>
+
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

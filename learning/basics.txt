@@ -1,0 +1,28 @@
+#### 2D Projects ####
+
+Based upon what I have recently encountered.
+
+Working with sprites. Firstly we notice that when working with a sprite project
+there are several aspects to remember and need be considered. Firstly, in unity, we work
+in scenes. There are ofcourse assets that are representes the object data needed to 
+create the scenes, stored in the disk. Scenes are then constructed by the congregation
+of these hard-stored assets. 
+
+1. we commence by first creating a "new scene"
+
+2. we then create an empty gameobject, that we rename player. This player-object in turn 
+will be constructed by giving it multiple functions, assets and so on. 
+
+3. It is started by selecting from the sprites, which one will represent the idle animation, select them and then
+drag them to the playerobject. Subsequently, renaming the animation to for instance "PlayerIdle", 
+and so on. This will create a SpriteRenderer and an Animator in the player-object
+
+4. The saved animation, PlayerIdle also generated in the animations folder an animations-controller, that will allow us
+to control the animation. 
+
+5. we can create a separate folder in the Assets\Animations folder named Assets\Animations\AnimationControllers. 
+
+6. If we now create a new animation by moving more sprites to the player-object, we will generate another animation, 
+but not an animation-controller. 
+
+7. The animation-controller is the 
