@@ -31,6 +31,169 @@ Shader "MyShader" {
 
 
 
+
+
+## Compute Shaders
+
+### Basics
+
+
+
+***Like an extension of a c# script***
+
+* The compute shader works like an extension of a C# script
+
+
+
+***Basics***
+
+* Similar to [regular shaders](https://docs.unity3d.com/Manual/class-Shader.html), compute shaders are Asset files in your project, with a *.compute* file extension. They are written in DirectX 11 style [HLSL](http://msdn.microsoft.com/en-us/library/windows/desktop/bb509561.aspx) language, with a minimal number of #pragma compilation directives to indicate which functions to compile as compute shader kernels.
+
+* Here’s a basic example of a compute shader file, which fills the output texture with red:
+
+  ```c
+  // test.compute
+  
+  #pragma kernel FillWithRed
+  
+  RWTexture2D<float4> res;
+  
+  [numthreads(1,1,1)]
+  void FillWithRed (uint3 dtid : SV_DispatchThreadID)
+  {
+      res[dtid.xy] = float4(1,0,0,1);
+  }
+  ```
+
+* The language is standard [DX11 HLSL](https://docs.unity3d.com/Manual/SL-ShadingLanguage.html), with an additional `#pragma kernel FillWithRed` directive. 
+
+
+
+***Kernel***
+
+* One compute shader Asset file must contain at least one`compute kernel` that can be invoked, 
+
+* and that function is indicated by the `#pragma directive`. 
+
+* ***What this means:***  the `#pragma kernel FillWithRed` is that we are providing the name of the program, such that it can be called. 
+
+* There can be more kernels in the file; just add multiple `#pragma kernel` lines
+
+* When using multiple `#pragma kernel` lines, note that comments of the style `// text` are not permitted on the same line as the `#pragma kernel` directives, and cause compilation errors if used.
+
+* The `#pragma kernel` line can optionally be followed by a number of preprocessor macros to define while compiling that kernel, for example:
+
+  ```c
+  #pragma kernel KernelOne SOME_DEFINE DEFINE_WITH_VALUE=1337
+  #pragma kernel KernelTwo OTHER_DEFINE
+  // ...
+  ```
+
+
+
+
+
+
+
+### Default compute shader code
+
+***Getting started***
+
+```c#
+// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel CSMain
+
+// Create a RenderTexture with enableRandomWrite flag and set it
+// with cs.SetTexture
+RWTexture2D<float4> Result;
+
+[numthreads(8,8,1)]
+void CSMain (uint3 id : SV_DispatchThreadID)
+{
+    // TODO: insert actual code here!
+
+    Result[id.xy] = float4(id.x & id.y, (id.x & 15)/15.0, (id.y & 15)/15.0, 0.0);
+}
+
+```
+
+* First line: `#pragma kernel CSMain` is providing the name of the program we want the compiler to run (note that ***we define this function later in the code***)
+* ***The texture***: unity generates a texture, as a render texture TARGET. 
+  * Specifies that unity will read and write to it as a ***variable***
+  * The `RWTexture2D`
+* `[numbthreads()]`: provides the dimensions thread groups to be used by our compute shader
+  * keep in mind that the compute shader runs code in parallel on the  gpu
+  * the numthreads provide how this computation on the gpu will be performed. 
+* inside the `CSMain` function: it takes the texture `Result` and the given index o our thread (compute cell), and assigns it a color. 
+* `float(4)` for color: we have a 4d-vector for the RGBa vector, I assume, that we are returning to the `Result` texture. 
+
+
+
+
+
+***Compute shader has no target***
+
+* Because the compute shader does not have a target, e.g. a mesh, 
+* we need to tell it how, when, where it will run. 
+
+
+
+***In unity***
+
+* **C# script**: create a new C# script in unity. 
+* Name it "ComputeShaderTest" 
+* create a public reference to our compute shader inside the class: add `public ComputeShader computeShader;`
+
+
+
+```c#
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class NewBehaviourScript : MonoBehaviour
+{
+
+    // I wonder if we are calling a native template that is
+    // the ComputeShader inside unity, or if it is the 
+    // compute shader that we have scripted ourselves that 
+    // we need to call, in that case the name is incorrect. 
+    public ComputeShader computeShader; // assign our newly created shader to this. 
+    public RenderTexture renderTexture;
+
+    // Start is called before the first frame update
+    void Start()
+    {
+        renderTexture = new RenderTexture(256,256, 24)
+        renderTexture.enableRandomWrite = true;
+        renderTexture.Create();
+
+
+        computeShader.SetTexture(0, "Result", renderTexture);
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        
+    }
+}
+
+```
+
+* The `public ComputeShaader computeShader`: seems to get exposed in the unity editor. 
+  * The `ComputeShader` seems to be a unity class. 
+  * When we write `public [SomeClass] [name we provide]`: it will get exposed in the unity editor, and then I assume that we in turn specifically provide the name of our compute shader script. 
+* `computeShader.SetTexture(0, "Result", renderTexture);`
+  * assigning the texture to the our computeshader
+  * First parameter of the `computeShader.SetTexture`, is the KERNEL INDEX (in this case `0`)
+  * KERNEL INDEX: each kernel in our shader is assigned an index
+  * because we only have one kernel (a single method CSMain) in our computeshader, we know 
+  * it to have index 0 
+  * otherwise we would be able to use the FindKernel method to find the kernel by name. 
+
+
+
 ## Projects
 
 ### Wireframe
