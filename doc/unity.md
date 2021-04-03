@@ -124,7 +124,8 @@ void CSMain (uint3 id : SV_DispatchThreadID)
 * `[numbthreads()]`: provides the dimensions thread groups to be used by our compute shader
   * keep in mind that the compute shader runs code in parallel on the  gpu
   * the numthreads provide how this computation on the gpu will be performed. 
-* inside the `CSMain` function: it takes the texture `Result` and the given index o our thread (compute cell), and assigns it a color. 
+* inside the `CSMain` function: 
+  * it takes the texture `Result` and the given index o our thread (compute cell), and assigns it a color. 
 * `float(4)` for color: we have a 4d-vector for the RGBa vector, I assume, that we are returning to the `Result` texture. 
 
 
@@ -184,6 +185,7 @@ public class NewBehaviourScript : MonoBehaviour
 * The `public ComputeShaader computeShader`: seems to get exposed in the unity editor. 
   * The `ComputeShader` seems to be a unity class. 
   * When we write `public [SomeClass] [name we provide]`: it will get exposed in the unity editor, and then I assume that we in turn specifically provide the name of our compute shader script. 
+  * <img src="./imgs/compshade_030421_T0z5s1AElc.png" alt=T0z5s1AElc style="zoom:50%">
 * `computeShader.SetTexture(0, "Result", renderTexture);`
   * assigning the texture to the our computeshader
   * First parameter of the `computeShader.SetTexture`, is the KERNEL INDEX (in this case `0`)
@@ -191,6 +193,78 @@ public class NewBehaviourScript : MonoBehaviour
   * because we only have one kernel (a single method CSMain) in our computeshader, we know 
   * it to have index 0 
   * otherwise we would be able to use the FindKernel method to find the kernel by name. 
+
+
+
+
+
+***Getting a preview of the compute shader***
+
+* The `Assets/ComputeShaderTest.`
+
+```c#
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class ComputeShaderTest : MonoBehaviour
+{
+    public ComputeShader computeShader;
+    public RenderTexture renderTexture; 
+    // Start is called before the first frame update
+    void Start()
+    {
+        renderTexture = new RenderTexture(256, 256, 24);
+        renderTexture.enableRandomWrite = true;
+        renderTexture.Create();
+
+
+        computeShader.SetTexture(0, "Result", renderTexture);
+        computeShader.Dispatch(0, renderTexture.width / 8, renderTexture.height / 8, 1);
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        
+    }
+}
+
+```
+
+* and `Assets/ComputeShader_v1.compute`
+
+* ```c
+  // Each #kernel tells which function to compile; you can have many kernels
+  #pragma kernel CSMain
+  
+  // Create a RenderTexture with enableRandomWrite flag and set it
+  // with cs.SetTexture
+  RWTexture2D<float4> Result;
+  
+  [numthreads(8,8,1)]
+  void CSMain (uint3 id : SV_DispatchThreadID)
+  {
+      // TODO: insert actual code here!
+  
+      Result[id.xy] = float4(id.x & id.y, (id.x & 15)/15.0, (id.y & 15)/15.0, 0.0);
+  }
+  
+  ```
+
+* **Camera**: Next select the camera, and move the `ComputeShaderTest.cs` to the camera components, drag and drop
+
+* **Play generates texture**: Next click play, such that the texture gets generated and stored in the `RenderTexture`  public class
+
+* **Play and select field:** preview the generated texture, press PLAY and while in play select the `RenderTexture` field:
+
+* <img src="./imgs/compshade_030421_PLkGRbbZL3.png" alt=PLkGRbbZL3 style="zoom:50%">
+
+
+
+
+
+
 
 
 
@@ -516,9 +590,35 @@ Shader "Simple Talk/Wireframe"
 
 
 
+## Languagespecific stuff
 
+### & bitwise operator
 
+We have notes in our code that there are:
 
+```c#
+int a = 0b1100;
+int b = 0b1000;
+Debug.Log(a & b);
+```
+
+***What does the & operator do in this case***: 
+
+* Assume that the numbers are in 4 bits. 
+
+* The operation 3 & 1. 
+
+* Looks at the numbers in binary so 1100 and 1000 and will output the number where both values are . 1000 = 1
+
+* ```c#
+  (decimal 5)    0 1 0 1
+                 | | | | AND operation
+  (decimal 3)    0 0 1 1 
+                       | Results with
+  (decimal 1)  = 0 0 0 1 
+  ```
+
+  
 
 
 
