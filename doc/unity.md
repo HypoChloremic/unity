@@ -350,7 +350,7 @@ void CSMain (uint3 id : SV_DispatchThreadID)
 
 
 
-### Compute buffers
+### Buffers: compute buffers
 
 ***General***
 
@@ -360,6 +360,7 @@ void CSMain (uint3 id : SV_DispatchThreadID)
 
 ***Doing it***
 
+* The idea is to generate a grid of cubes, and changing their colors with the help of our Compute Shader, and the compute buffer. 
 * Create a new shader, called "RandomShader"
 * Add a new `struct Cube`
 
