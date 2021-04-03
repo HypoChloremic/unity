@@ -264,9 +264,283 @@ public class ComputeShaderTest : MonoBehaviour
 
 
 
+#### Render the texture directly to the camera
+
+* Continuing from above
+
+* having placed the "ComputeShaderTest.cs" as a component to the camera,
+
+* we want to override the `OnRenderImage` function, which will allow us to render the texture directly to the camera:
+
+* ```c#
+  public class ComputeShaderv1 : MonoBehaviour{
+  
+  	// bla bla 
+      public void OnRenderImage(RenderTexture src, RenderTexture dest){
+          if (renderTexture == null){
+              renderTexture = new RenderTexture(256, 256, 24);
+              renderTexture.enableRandomWrite = true;
+              renderTexture.Create();               
+          }
+          computeShader.SetTexture(0, "Result", renderTexture);
+          computeShader.Dispatch(0, renderTexture.width/8, renderTexture.height/8, 1);
+          
+          Graphics.Blit(renderTexture, dest);
+      }
+      
+      // bla bla
+  
+  }
+  
+  
+  ```
+
+* Running the scene now, we will see the computeshader directly rendering to our screen. 
 
 
 
+#### Twiddling with the compute shader
+
+* We want a square texture
+* in the "ComputeShader_v2" add outside of `CSMain`:
+  * `float Resolution;`
+* inside the `CSMain`, we change the code into:
+
+
+
+```c#
+void CSMain (uint3 id : SV_DispatchThreadID)
+{
+    // TODO: insert actual code here!
+    float x = id.x / Resolution;
+    float y = id.y / Resolution; 
+    Result[id.xy] = float4(x, y, 0, 0);
+}
+```
+
+* In effect we are taking the computeshader current cell, and dividing by the `Resolution`
+
+* Next we want to give the `Resolution` a value, which we will be doing from our C# script, `ComputeShaderTestv2.cs`:
+
+  
+
+  ```c#
+  {
+  
+  	// bla bla
+      computeShader.SetTexture(0, "Result", renderTexture);
+      computeShader.SetFloat("Resolution", renderTexture.width); // this is the new part
+      computeShader.Dispatch(0, renderTexture.width/8, renderTexture.height/8 , 1);
+  	// bla bla
+  
+  }
+  
+  // bla bla
+  ```
+
+* Where we use `computeShader.SetFloat` and the name of the float variable to set the value for the `Resolution`. 
+
+* **Play** the scene now, and we will be seeing this:
+
+
+
+<img src="./imgs/compshade_030421_0Bm5UYGA74.png" alt=0Bm5UYGA74 style="zoom:50%">
+
+
+
+
+
+### Compute buffers
+
+***General***
+
+* Great combination to achieve things that your cpu may struggle with
+
+
+
+***Doing it***
+
+* Create a new shader, called "RandomShader"
+* Add a new `struct Cube`
+
+```c#
+struct Cube = {
+    float3 position;
+    float4 color;
+};
+```
+
+* Also add a `RWStructuredBuffered<Cube> cubes;`. 
+* it will be the data that will pass back and forth our compute shader. 
+
+```
+RWStructuredBuffer<Cube> cubes; 
+```
+
+* In our `CSMain` function, set the number of threads to be one dimensional, to keep it simple: `[numthreads(10,1,1)]`
+* For now, let us retrieve the cube from our buffer, and return the color red:
+
+```c#
+#pragma kernel CSMain
+
+struct Cube = {
+	float3 position; 
+	float4 color;
+};
+
+RWSstructuredBuffer<Cube> cubes;
+float resolution
+
+
+[numthreads(10,1,1)]
+void CSMain(uint3 id: SV_DispatchThreadID){
+	x_pos = id.x / resolution;
+	Cube cube = cubes[id.x];
+	cube.color = float4(x_pos, 0.0, 0.0, 1.0)
+	
+	cubes[id.x] = cube
+
+}
+```
+
+***Setting up in the c# script***
+
+* Start by creating the struct for our buffer to use
+
+
+
+```c#
+// bla bla 
+using UnityEngine;
+
+public struct Cube {
+	public Vector3 position; 
+	public Color color; 
+}
+
+public class ComputeShaderTestv2 : MonoBehaviour{
+
+// bla bla
+}
+```
+
+* Create an array in our class for our cube data:
+
+```c#
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+
+
+public struct Cube{
+    public Vector3 position;
+    public Color color;
+}
+
+
+public class ComputeShaderTestv2 : MonoBehaviour{
+    public ComputeShader computeShader; // manually provide the compute shader 
+    public RenderTexture renderTexture;
+    // Start is called before the first frame update
+
+    public Mesh mesh;
+    public Material material;
+    public int count = 50;
+    public int repititions = 1;
+
+    private List<GameObject> objects;
+    private Cube[] data;
+
+
+    public void CreateCubes()
+    {
+        objects = new List<GameObject>();
+        data = new Cube[count * count];
+        for (int x=0 ; x<count; x++){
+            for (int y=0; y<count; y++){
+                CreateCube(x,y);
+            }
+        }
+    }
+
+
+    private void CreateCube(int x, int y){
+        GameObject cube = new GameObject("Cube_"+x*count+y, typeof(MeshFilter), typeof(MeshRenderer));
+        cube.GetComponent<MeshFilter>().mesh = mesh;
+        cube.GetComponent<MeshRenderer>().material = new Material(material);
+        cube.transform.position = new Vector3(x,y, Random.Range(-0.1f, 0.1f));
+        Color color = Random.ColorHSV();
+        cube.GetComponent<MeshRenderer>().material.SetColor("_Color", color);
+
+
+        objects.Add(cube);
+
+        Cube cubeData = new Cube();
+        cubeData.position = cube.transform.position;
+        cubeData.color = color;
+        data[x*count + y] = cubeData;
+    }
+    
+
+    public void OnRandomizedGPU(){
+        int colorSize = sizeof(float) * 4;
+        int vector3size = sizeof(float) * 3;
+        int totalsize = colorSize * vector3size;
+        ComputeBuffer cubesBuffer = new ComputeBuffer(data.Length, totalsize);
+        cubesBuffer.SetData(data);
+
+        computeShader.SetBuffer(0, "cubes", cubesBuffer);
+        computeShader.SetFloat("resolution", data.Length);
+        computeShader.Dispatch(0, data.Length / 10, 1, 1);
+
+        for (int i=0; i<objects.Count; i++){
+            GameObject obj = objects[i];
+            Cube cube = data[i];
+            obj.transform.position = cube.position;
+            obj.GetComponent<MeshRenderer>().material.SetColor("_Color", cube.color);
+        }
+    }
+
+    private void OnGUI(){
+        if(objects == null){
+            if(GUI.Button(new Rect(0,0,100,50), "Create")){
+                CreateCubes();
+            }
+        }
+        else{
+            if (GUI.Button(new Rect(0,0,100,50),"Random GPU")){
+                OnRandomizedGPU();
+            } 
+
+        }
+    }
+
+
+    void Start(){
+
+    }
+
+    // Update is called once per frame
+    void Update(){
+
+    }
+}
+
+```
+
+* The `ComputeBuffer` needs to know the size of the data. 
+  * hence we use the `sizeof` method to provide it with that: `int colorSize = sizeof(float) * 4` // becuase the color is  a `float4`
+
+
+
+***Output:***
+
+* When hitting play:
+
+
+
+<img src="./imgs/compshade_030421_zpSz3YFPvG.png" alt=zpSz3YFPvG style="zoom:50%">
 
 ## Projects
 
@@ -622,9 +896,9 @@ Debug.Log(a & b);
 
 
 
+## Error
 
+### Monobehavior
 
-
-
-
+* Make sure that the `public class [name]` matches the name of the script. 
 
