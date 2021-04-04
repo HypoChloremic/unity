@@ -1,3 +1,53 @@
+# Unity backend
+
+## Unity script cycle
+
+### Flowchart
+
+<img src="./imgs/unity_bg_040421_ni0G9CknwA.png" alt="ni0G9CknwA" style="zoom:50%;" />
+
+<img src="./imgs/unity_bg_040421_VkfKepAnwY.png" alt="VkfKepAnwY" style="zoom:50%;" />
+
+<img src="./imgs/unity_bg_040421_EUqfOaBacg.png" alt="EUqfOaBacg" style="zoom:50%;" />
+
+
+
+### Execution order of event functions
+
+***Before first frame update***
+
+* The `start()` is called before the first frame update, onlöy if the script instance is enabled. 
+
+
+
+***Inbetween updates***
+
+* `OnApplicationPause`
+
+
+
+!!! ***Rendering***
+
+* Rendering the objects
+* `OnPreCull`: Called before the camera culls the scene. Culling determines which objects are visible to the camera. OnPreCull is called just before culling takes place.
+* `OnBecameVisible/OnBecameInvisible`: Called when an object becomes visible/invisible to any camera.
+* `OnWillRenderObject`: Called `once` for each camera if the object is visible.
+* `OnPreRender`: Called before the camera starts rendering the scene.
+* `OnRenderObject`: Called after all regular scene rendering is done. You can use GL class or Graphics.DrawMeshNow to draw custom geometry at this point.
+* `OnPostRender`: Called after a camera finishes rendering the scene.
+* `OnRenderImage`: Called after scene rendering is complete to allow postprocessing of the screen image.
+* `OnGUI`: Called multiple times per frame in response to GUI events. The Layout and Repaint events are processed first, followed by a Layout and keyboard/mouse event for each input event.
+* `OnDrawGizmos` Used for drawing Gizmos in the scene view for visualisation purposes.
+
+## Components
+
+
+
+### GetComponent<Renderer>()
+
+* Returns the current gameobject, specifically the `Renderer`
+* This will be containing the texture of the object. 
+
 # Shaders
 
 ## Basics
@@ -543,9 +593,53 @@ public class ComputeShaderTestv2 : MonoBehaviour{
 
 <img src="./imgs/compshade_030421_zpSz3YFPvG.png" alt=zpSz3YFPvG style="zoom:50%">
 
-## Projects
 
-### Wireframe
+
+
+
+
+
+## Languagespecific stuff
+
+### & bitwise operator
+
+We have notes in our code that there are:
+
+```c#
+int a = 0b1100;
+int b = 0b1000;
+Debug.Log(a & b);
+```
+
+***What does the & operator do in this case***: 
+
+* Assume that the numbers are in 4 bits. 
+
+* The operation 3 & 1. 
+
+* Looks at the numbers in binary so 1100 and 1000 and will output the number where both values are . 1000 = 1
+
+* ```c#
+  (decimal 5)    0 1 0 1
+                 | | | | AND operation
+  (decimal 3)    0 0 1 1 
+                       | Results with
+  (decimal 1)  = 0 0 0 1 
+  ```
+
+  
+
+
+
+## Error
+
+### Monobehavior
+
+* Make sure that the `public class [name]` matches the name of the script. 
+
+# Projects
+
+## Wireframe
 
 * Add 3d cube to the env
 * `create new shader`: Create > Shader > Standard Surface Shader
@@ -859,47 +953,9 @@ Shader "Simple Talk/Wireframe"
 
 
 
+## Moving Pixels
 
+### Setting up the project
 
-
-
-
-
-## Languagespecific stuff
-
-### & bitwise operator
-
-We have notes in our code that there are:
-
-```c#
-int a = 0b1100;
-int b = 0b1000;
-Debug.Log(a & b);
-```
-
-***What does the & operator do in this case***: 
-
-* Assume that the numbers are in 4 bits. 
-
-* The operation 3 & 1. 
-
-* Looks at the numbers in binary so 1100 and 1000 and will output the number where both values are . 1000 = 1
-
-* ```c#
-  (decimal 5)    0 1 0 1
-                 | | | | AND operation
-  (decimal 3)    0 0 1 1 
-                       | Results with
-  (decimal 1)  = 0 0 0 1 
-  ```
-
-  
-
-
-
-## Error
-
-### Monobehavior
-
-* Make sure that the `public class [name]` matches the name of the script. 
+* 2D project: createt a 2D project. 
 
