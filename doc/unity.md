@@ -1716,3 +1716,30 @@ Debug.Log(a & b);
 
   
 
+### Attributes
+
+Sometimes we see
+
+```c#
+[Header('Cloth settings')]
+public Vector2Int numPoints;
+public Vector2 boundsSize;
+```
+
+What `Header('Cloth settings')` is that it attributes itself as a header in the inspector with the given name for the declared variables stated below it. 
+
+
+
+### Override and class inheritance
+
+#### base.Start()
+
+We have come across:
+
+```c#
+protected override void Start(){
+	base.Start();
+}
+```
+
+What `base.` means is that it is referring to the parent class, so we are using the `Start` method from the parent class. 
