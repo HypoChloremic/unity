@@ -16,7 +16,7 @@
 
 ***Before first frame update***
 
-* The `start()` is called before the first frame update, onlöy if the script instance is enabled. 
+* The `start()` is called before the first frame update, only if the script instance is enabled. 
 
 
 
@@ -38,6 +38,10 @@
 * `OnRenderImage`: Called after scene rendering is complete to allow postprocessing of the screen image.
 * `OnGUI`: Called multiple times per frame in response to GUI events. The Layout and Repaint events are processed first, followed by a Layout and keyboard/mouse event for each input event.
 * `OnDrawGizmos` Used for drawing Gizmos in the scene view for visualisation purposes.
+
+
+
+
 
 ## Components
 
